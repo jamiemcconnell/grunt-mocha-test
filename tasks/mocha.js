@@ -69,6 +69,8 @@ module.exports = function(grunt) {
         } else {
           complete(null, failureCount);
         }
+        
+        grunt.event.emit('mochaTest.done', failureCount, options.captureFile);
       });
     }, function(error, failureCount) {
       // restore the uncaught exception handlers
