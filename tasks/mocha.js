@@ -67,13 +67,13 @@ module.exports = function(grunt) {
           grunt.log.error(error.stack);
           complete(error);
         } else {
+          // Send a 'done' event with the failureCount and location of 
+          // the capture file so we can do some post-processing.
+          //
+          grunt.event.emit('mochaTest.done', failureCount, options.captureFile);
+        
           complete(null, failureCount);
         }
-
-        // Send a 'done' event with the failureCount and location of 
-        // the capture file so we can do some post-processing.
-        //
-        grunt.event.emit('mochaTest.done', failureCount, options.captureFile);
       }, function(eventType, error, obj) {
         // Emit a Grunt Event with whatever we recieve.
         //
