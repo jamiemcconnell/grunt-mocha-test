@@ -29,7 +29,7 @@ function MochaWrapper(params) {
     file.src.forEach(mocha.addFile.bind(mocha));
   });
 
-  this.run = function(callback) {
+  this.run = function(callback, eventCallback) {
     try {
       // This hack is a copy of the hack used in
       // https://github.com/gregrperkins/grunt-mocha-hack
@@ -58,6 +58,21 @@ function MochaWrapper(params) {
       if (mocha.options.colors != null) {
         Mocha.reporters.Base.useColors = mocha.options.colors;
       }
+
+      // Pass the Mocha events back to bubbling back up to Grunt.
+      // See Mocha source for additional events: https://github.com/visionmedia/mocha/blob/master/lib/runner.js#L34
+      //
+      mochaRunner.on('start', function() { eventCallback('start'); });
+      mochaRunner.on('end', function() { eventCallback('end'); });
+      mochaRunner.on('suite', function(suite) { eventCallback('suite', null, suite); });
+      mochaRunner.on('suite end', function(suite) { eventCallback('suite end', null, suite); });
+      mochaRunner.on('test', function(test) { eventCallback('test', null, test); });
+      mochaRunner.on('test end', function(test) { eventCallback('test end', null, test); });
+      mochaRunner.on('hook', function(hook) { eventCallback('hook', null, hook); });
+      mochaRunner.on('hook end', function(hook) { eventCallback('hook end', null, hook); });
+      mochaRunner.on('pass', function(test) { eventCallback('pass', null, test); });
+      mochaRunner.on('fail', function(test, err) { eventCallback('fail', err, test); });
+      mochaRunner.on('pending', function(test) { eventCallback('pending', null, test); });
 
       var runDomain = domain.create();
       runDomain.on('error', mochaRunner.uncaught.bind(mochaRunner));
